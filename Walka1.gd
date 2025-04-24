@@ -8,14 +8,22 @@ var current_player_health = 0
 var current_player_mana = 0
 var current_enemy_health = 0
 var is_defending = false
+
 var czar_id=0
 var czar_ch=false
 var czar_ef=0
+
+var item_id=0
+var item_il = []
+var item_ch=false
+
 var efekt_czaru_aktywny = false
 var tury_efektu_czaru = 0
 
 func _ready():
 	State.spell_init()
+	State.item_init()
+	$dzwieki.stream.loop = true
 	$dzwieki.play()#granie muzyczki
 	set_health($EnemyContainer/ProgressBar,enemy.health, enemy.health)
 	set_health($PlayerPanel/PlayerData/Label/Health,State.current_health, State.max_health)
@@ -26,20 +34,38 @@ func _ready():
 	current_player_mana = State.current_mana
 	current_enemy_health = enemy.health
 	
+	$zaklecia/Spell1.text = State.spell[0]
+	$zaklecia/Spell2.text = State.spell[1]
+	$zaklecia/Spell3.text = State.spell[2]
+	
+	$ekwipunek/it_1/Item_1.text = State.item[0]
+	$ekwipunek/it_2/Item_2.text = State.item[1]
+	$ekwipunek/it_3/Item_3.text = State.item[2]
+	
+	$ekwipunek/it_1/it_1_il.text = str(State.item_amount[0])
+	$ekwipunek/it_2/it_2_il.text = str(State.item_amount[1])
+	$ekwipunek/it_3/it_3_il.text = str(State.item_amount[2])
+	
+	for i in range(3):
+		item_il.append(State.item_amount[i])
+		print("Przedmiot %d w ilości = %d"%[i,item_il[i]])
+	
 	$textbox.hide()
 	$ActionPanel.hide()
 	$EnemyContainer.hide()
+	$zaklecia.hide()
+	$ekwipunek.hide()
 	$PlayerPanel.hide()
+	$back.hide()
 	$GameOver.hide()
 	
 	display_text("Dziki %s Atakuje!"%enemy.name.to_upper())
 	await self.textbox_closed
 	$ActionPanel.show()
-	$zaklecia.hide()
 	$EnemyContainer.show()#bez tej linijki nei widać ciosmaka
 	$EnemyContainer/ProgressBar.show()
 	$PlayerPanel.show()
-	
+
 #-------------------------------------------------------------------
 func set_health(progress_bar, health, max_health):
 	progress_bar.value = health
@@ -77,7 +103,7 @@ func enemy_turn():
 		await $AnimationPlayer.animation_finished
 		await self.textbox_closed
 		if current_enemy_health <= 0:
-			display_text("Ciemiężyciel %s padł od powikłań zaklęcia!" % enemy.name)
+			display_text("Przeciwnik %s padł od powikłań zaklęcia!" % enemy.name)
 			await self.textbox_closed
 			$dzwieki/dead.play()
 			$dzwieki/win.play()
@@ -102,7 +128,7 @@ func enemy_turn():
 		display_text("Jesteś bliższy do niezaliczenia semestru\n o %d punktów ECTS!"%enemy.damage)
 		await self.textbox_closed
 		if current_player_health<=0:
-			display_text("Ujebałeś studia")
+			display_text("Przewaliłeś studia")
 			await self.textbox_closed
 			$dzwieki/player_dead.play()
 			$AnimationPlayer.play("GameOver")
@@ -114,7 +140,7 @@ func enemy_turn():
 
 func _on_RUN_pressed():
 	if enemy.level==1:#prosty/podstawowy przeciwnik
-		display_text("Udało się spierdolić z ćwiczeń!")
+		display_text("Ucieczka ukończona powodzeniem!")
 		await self.textbox_closed
 		await get_tree().create_timer(0.5).timeout
 		get_tree().quit(0)
@@ -123,23 +149,23 @@ func _on_RUN_pressed():
 		var los = randi_range(1, 21)  # Losowanie liczby od 1 do 21
 		print("Wylosowano:", los)  # Debug, aby zobaczyć wynik losowania
 		if los<16:
-			display_text("Nie udało się spierdolić!")
+			display_text("Nie udało się zwiać!")
 			await self.textbox_closed
 			enemy_turn()
 			
 		elif los>15:
-			display_text("Udało się spierdolić z ćwiczeń!")
+			display_text("Udało się zwiać z ćwiczeń!")
 			await self.textbox_closed
 			await get_tree().create_timer(0.5).timeout
 			get_tree().quit(0)
 
 	if enemy.level==3:#przeciwnik bardzo trudny, boss, przed nim nie uciekniesz
-		display_text("Przed nim nie da się spierdolić! Oczekuj śmierci!")
+		display_text("Przed nim nie da się uciec! Oczekuj śmierci!")
 		await self.textbox_closed
 		enemy_turn()
 
 func _on_ATTACK_pressed():
-	display_text("Pierdolnąłeś algorytmem sortowania bąbelkowego!")
+	display_text("Uderzyłeś algorytmem sortowania bąbelkowego!")
 	await self.textbox_closed
 	
 	current_enemy_health -= State.damage
@@ -147,11 +173,11 @@ func _on_ATTACK_pressed():
 	$AnimationPlayer.play("enemy_damaged")
 	await $AnimationPlayer.animation_finished
 	
-	display_text("Przyjebałeś z siłą %d punktów wpierdolu!"%State.damage)
+	display_text("Uderzyłeś z siłą %d punktów!"%State.damage)
 	await self.textbox_closed
 	
 	if current_enemy_health <= 0:
-		display_text("Ciemiężyciel %s został pokonany!"%enemy.name)
+		display_text("Przeciwnik %s został pokonany!"%enemy.name)
 		await self.textbox_closed
 		$dzwieki/dead.play()
 		$dzwieki/win.play()
@@ -164,9 +190,16 @@ func _on_ATTACK_pressed():
 func _on_MAGIC_pressed():
 	$ActionPanel.hide()
 	$zaklecia.show()
+	$back.show()
+
+func _on_ITEMS_pressed():
+	$ActionPanel.hide()
+	$ekwipunek.show()
+	$back.show()
 
 func wykonaj_czar():
 	$zaklecia.hide()
+	$back.hide()
 	
 	if current_player_mana - State.spell_cost[czar_id] < 0:
 		display_text("Masz za mało many na użycie czaru!")
@@ -174,7 +207,7 @@ func wykonaj_czar():
 		$ActionPanel.show()
 		return
 
-	display_text("Pizdnąłeś %s!" % State.spell[czar_id])
+	display_text("Użyłeś zaklęcia %s!" % State.spell[czar_id])
 	await self.textbox_closed
 
 	current_enemy_health -= State.spell_dmg[czar_id]
@@ -189,12 +222,12 @@ func wykonaj_czar():
 	$AnimationPlayer.play("enemy_damaged")
 	await $AnimationPlayer.animation_finished
 
-	display_text("Przyjebałeś z siłą %d punktów wpierdolu!\nUżyłeś %d punktów many!" %
+	display_text("Wyczarowałeś z siłą %d punktów !\nUżyłeś %d punktów many!" %
 		[State.spell_dmg[czar_id], State.spell_cost[czar_id]])
 	await self.textbox_closed
 
 	if current_enemy_health <= 0:
-		display_text("Ciemiężyciel %s został pokonany!" % enemy.name)
+		display_text("Przecienik %s został pokonany!" % enemy.name)
 		await self.textbox_closed
 		$dzwieki/dead.play()
 		$dzwieki/win.play()
@@ -205,11 +238,48 @@ func wykonaj_czar():
 	else:
 		enemy_turn()
 
-func _on_DEFEND_pressed():#do wywalenia, nie ma być opcji obrony
-	is_defending = true
-	display_text("Przygotowywujesz się na najgorsze!")
+func uzyj_przedmiot():
+	$ekwipunek.hide()
+	$back.hide()
+
+	if item_il[item_id] <= 0:
+		display_text("Nie masz więcej sztuk przedmiotu!")
+		await self.textbox_closed
+		$ActionPanel.show()
+		return
+
+	display_text("Użyłeś %s!" % State.item[item_id])
 	await self.textbox_closed
-	await get_tree().create_timer(0.25).timeout
+
+	match State.item_effect[item_id]:
+		0:
+			current_player_health = min(current_player_health + 20, State.max_health)#zabezpieczenie by nie wyjść poza zakres, czyli mieć 50/30 HP
+			display_text("Odzyskałeś 20 punktów zdrowia!")
+		1:
+			current_player_mana = min(current_player_mana + 20, State.max_mana)
+			display_text("Odzyskałeś 20 punktów many!")
+		2:
+			current_player_health = min(current_player_health + 10, State.max_health)
+			current_player_mana = min(current_player_mana + 10, State.max_mana)
+			display_text("Odzyskałeś 10 punktów zdrowia i 10 many!")
+	await self.textbox_closed
+
+	item_il[item_id] -= 1
+	State.item_amount[item_id] = item_il[item_id]  # synchronizacja stanu z zewnętrznym stanem gry
+
+	# Odśwież etykietkę ilości przedmiotu
+	match item_id:
+		0:
+			$ekwipunek/it_1/it_1_il.text = str(item_il[item_id])
+		1:
+			$ekwipunek/it_2/it_2_il.text = str(item_il[item_id])
+		2:
+			$ekwipunek/it_3/it_3_il.text = str(item_il[item_id])
+
+	# Odśwież HP i MP na panelu
+	set_health($PlayerPanel/PlayerData/Label/Health, current_player_health, State.max_health)
+	set_mana($PlayerPanel/PlayerData/Label/Mana, current_player_mana, State.max_mana)
+
 	enemy_turn()
 
 func _on_spell_1_pressed():
@@ -226,3 +296,24 @@ func _on_spell_3_pressed():
 	czar_id = 2
 	print("Wybrano zaklęcie 3")
 	wykonaj_czar()
+
+func _on_item_1_pressed():
+	item_id = 0
+	print("Wybrano przedmiot 1")
+	uzyj_przedmiot()
+
+func _on_item_2_pressed():
+	item_id = 1
+	print("Wybrano przedmiot 2")
+	uzyj_przedmiot()
+
+func _on_item_3_pressed():
+	item_id = 2
+	print("Wybrano przedmiot 3")
+	uzyj_przedmiot()
+
+func _on_back_pressed():
+	$zaklecia.hide()
+	$ekwipunek.hide()
+	$back.hide()
+	$ActionPanel.show()

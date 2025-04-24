@@ -5,11 +5,16 @@ var current_mana = 30
 var max_health = 35
 var max_mana = 30
 var damage = 20
+#zaklęcia
 #im więcej zaklęć, to trzeba dodać nowe puste elemanty do tablicy
 var spell = ["","",""]		#nazwa
 var spell_dmg = [0,0,0]		#obrażenia
 var spell_cost = [0,0,0,]	#koszta
 var spell_effect = [0,0,0]
+#przedmioty
+var item = []			#nazwa
+var item_amount = []	#ilość
+var item_effect = []	#efekt
 
 func spell_init():
 	# spell 1
@@ -22,8 +27,22 @@ func spell_init():
 	spell_dmg[1] = 10
 	spell_cost[1] = 4
 	spell_effect[1] = 0
-		# spell 3
+	# spell 3
 	spell[2] = "Quicksort"
 	spell_dmg[2] = 50
 	spell_cost[2] = 30
-	spell_effect[2] = 0#brka efektów dodatkowych
+	spell_effect[2] = 0#brak efektów dodatkowych
+
+func item_init():
+	#item 1
+	item.append("Kebab")
+	item_amount.append(3)
+	item_effect.append(0)
+	#item 2
+	item.append("Piwo")
+	item_amount.append(3)
+	item_effect.append(1)
+	#item 3
+	item.append("Małpka&Kanapka")
+	item_amount.append(3)
+	item_effect.append(2)
