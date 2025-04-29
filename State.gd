@@ -16,6 +16,7 @@ var item = []			#nazwa
 var item_amount = []	#ilość
 var item_effect = []	#efekt
 
+#inicjalizacja zaklęci
 func spell_init():
 	# spell 1
 	spell[0] = "Fireball"
@@ -28,21 +29,22 @@ func spell_init():
 	spell_cost[1] = 4
 	spell_effect[1] = 0
 	# spell 3
-	spell[2] = "Quicksort"
+	spell[2] = "Coś Potężnego"
 	spell_dmg[2] = 50
 	spell_cost[2] = 30
 	spell_effect[2] = 0#brak efektów dodatkowych
 
+#inicjalizacja przedmiotów
 func item_init():
 	#item 1
-	item.append("Kebab")
+	item.append("Chleb")
 	item_amount.append(3)
 	item_effect.append(0)
 	#item 2
-	item.append("Piwo")
+	item.append("Wino")
 	item_amount.append(3)
 	item_effect.append(1)
 	#item 3
-	item.append("Małpka&Kanapka")
+	item.append("Drugie śniadanie")
 	item_amount.append(3)
 	item_effect.append(2)

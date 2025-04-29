@@ -1,9 +1,10 @@
 extends Node
+#flagi opcji i animacji
+var choose := true	#flaga informująca że można zapętlać animację
+var m1Ch := true	#flaga  pozwalajaca na uzycie menu1
+var m2Ch := false	#flaga  pozwalajaca na uzycie menu2
 
-var choose := true
-var m1Ch := true
-var m2Ch := false
-
+#ukazuje potrzebny nam interfejs w chwili uruchomienia gry, oraz uruchamia zapętloną animację kamery
 func _ready():
 	$inter.show()
 	$inter/inter_1.show()
@@ -11,6 +12,7 @@ func _ready():
 	$music.play()
 	cam_anim_loop()
 
+#zapętlona animacja kamery
 func cam_anim_loop():
 	if not choose:
 		return
@@ -18,6 +20,7 @@ func cam_anim_loop():
 	await $animki.animation_finished
 	cam_anim_loop()
 
+#kliknięcei start w menu1, przejścei do menu2
 func _on_start_pressed():
 	print("START clicked, m1Ch:", m1Ch)
 	print("				, m2Ch:", m2Ch)
@@ -37,9 +40,8 @@ func _on_start_pressed():
 
 		m1Ch = false
 		m2Ch = true
-	
-	#get_tree().change_scene_to_file("res://Scena_walki_2D_testowa.tscn")
 
+#cofnięcie do menu1
 func _on_back_pressed():
 	print("BACK clicked, m2Ch:", m2Ch)
 	print("			, m1Ch:", m1Ch)
@@ -61,17 +63,21 @@ func _on_back_pressed():
 		m2Ch = false
 		cam_anim_loop()
 
+#opuszczenie dema
 func _on_quit_pressed():
 	if m1Ch:
 		choose = false
 		m1Ch = false
 		get_tree().quit(0)
 
+#przejście do sceney z przeciwnikiem na poziomie 1
 func _on_lv_1_pressed():
-	get_tree().change_scene_to_file("res://sceny/fight/l1_fight.tscn")
+	get_tree().change_scene_to_file("res://Assety/scenes/fight/l1_fight.tscn")
 
+#przejście do sceney z przeciwnikiem na poziomie 2
 func _on_lv_2_pressed():
-	get_tree().change_scene_to_file("res://sceny/fight/l2_fight.tscn")
+	get_tree().change_scene_to_file("res://Assety/scenes/fight/l2_fight.tscn")
 
+#przejście do sceney z przeciwnikiem na poziomie 3
 func _on_lv_3_pressed():
-	get_tree().change_scene_to_file("res://sceny/fight/l3_fight.tscn")
+	get_tree().change_scene_to_file("res://Assety/scenes/fight/l3_fight.tscn")
