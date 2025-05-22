@@ -81,3 +81,7 @@ func _on_lv_2_pressed():
 #przejście do sceney z przeciwnikiem na poziomie 3
 func _on_lv_3_pressed():
 	get_tree().change_scene_to_file("res://Assety/scenes/fight/l3_fight.tscn")
+
+
+func _on_world_map_pressed() -> void:
+	get_tree().change_scene_to_file("res://Assety/scenes/exploration/TEST_esk.tscn")
